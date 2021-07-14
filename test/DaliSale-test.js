@@ -59,7 +59,7 @@ contract("DALI-SALE", function ( accounts) {
     let tx = await Sale.depositProfit(ethPrice,  {from: owner, value: amount})
     let newPrice = await Sale.price()
     truffleAssert.eventEmitted(tx, 'Price', async (ev)=>{
-      console.log("New Price of DALIA in Pennies: "+ newPrice.toString())
+      console.log("New Price of DALIA in Cents: "+ newPrice.toString())
       return ev.newPrice.toString() == newPrice.toString() && ev.oldPrice.toString() == oldPrice.toString()
     })
    

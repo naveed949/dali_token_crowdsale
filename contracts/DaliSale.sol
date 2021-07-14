@@ -7,7 +7,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 contract DaliSale is Ownable{
   using SafeMath for uint256;
   IERC20 DALI;
-  uint256 public price = 100; // $1 = 100 penny
+  uint256 public price = 100; // $1 = 100 cent
   uint256 public ethPrice = 2500; // 1 eth = 2500 USDs
   constructor(address token) {
     DALI = IERC20(token);
@@ -15,8 +15,8 @@ contract DaliSale is Ownable{
   function buyDali() payable external {
     uint256 eths_ = msg.value;
   //  uint256 daliPrice_ = calcPrice(); // pass time if price recalculation is time specific
-    uint256 totalEthsInPennies = (eths_.mul(ethPrice.mul(100))).div(1 ether);
-    uint256 daliAmount_ = (totalEthsInPennies.div(price)).mul(1 ether); 
+    uint256 totalEthsInCents = (eths_.mul(ethPrice.mul(100))).div(1 ether);
+    uint256 daliAmount_ = (totalEthsInCents.div(price)).mul(1 ether); 
     require(daliAmount_ > 0, "insufficient value sent"); 
 
     DALI.transfer(msg.sender, daliAmount_);
@@ -30,7 +30,7 @@ contract DaliSale is Ownable{
     if(totalValue_ < 1 ether){
       PriceInCents_ = 100; // $1
     } else{
-      totalValue_ = (totalValue_.mul(ethPrice.mul(100))).div(1 ether); // ethPrice*100 to make sure price in pennies
+      totalValue_ = (totalValue_.mul(ethPrice.mul(100))).div(1 ether); // ethPrice*100 to make sure price in cents
       PriceInCents_ = totalValue_.div( ethPrice);
     }
      return PriceInCents_;
