@@ -7,15 +7,16 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 contract DaliSale is Ownable{
   using SafeMath for uint256;
   IERC20 DALI;
-  uint256 price = 100; // $1 = 100 penny
-  uint256 ethPrice = 250000; // 1 eth = 250000 pennies
+  uint256 public price = 100; // $1 = 100 penny
+  uint256 public ethPrice = 2500; // 1 eth = 2500 USDs
   constructor(address token) {
     DALI = IERC20(token);
   }
-  function buyDali() payable public {
+  function buyDali() payable external {
     uint256 eths_ = msg.value;
   //  uint256 daliPrice_ = calcPrice(); // pass time if price recalculation is time specific
-    uint256 daliAmount_ = eths_.mul(price); // eths_.div(price);
+    uint256 totalEthsInPennies = (eths_.mul(ethPrice.mul(100))).div(1 ether);
+    uint256 daliAmount_ = (totalEthsInPennies.div(price)).mul(1 ether); 
     require(daliAmount_ > 0, "insufficient value sent"); 
 
     DALI.transfer(msg.sender, daliAmount_);
@@ -25,10 +26,12 @@ contract DaliSale is Ownable{
   function calcPrice() private view returns(uint256){
     uint256 totalValue_ = address(this).balance;
     uint256 PriceInCents_;
+    
     if(totalValue_ < 1 ether){
       PriceInCents_ = 100; // $1
     } else{
-      PriceInCents_ = totalValue_.div(ethPrice);
+      totalValue_ = (totalValue_.mul(ethPrice.mul(100))).div(1 ether); // ethPrice*100 to make sure price in pennies
+      PriceInCents_ = totalValue_.div( ethPrice);
     }
      return PriceInCents_;
   }
@@ -37,14 +40,23 @@ function withdrawToBuyNFT(address payable recipient, uint256 value) public onlyO
   recipient.transfer(value);
   emit Withdraw(recipient, value);
 }
-function depositProfit() public payable onlyOwner {
+function depositProfit(uint256 ethNewPrice) public payable onlyOwner {
+  require(ethNewPrice > 0,"invalid eth price, it should be in USD");
+  
+  uint256 oldPrice;
+  ethPrice = ethNewPrice;
+  
   emit Deposit(msg.value);
-  // recalculation upon each deposit
-  minPrice = calcPrice();
+  // price recalculation upon each deposit
+  oldPrice = price;
+  price = calcPrice();
+
+  emit Price(price, oldPrice);
 }
 
 
   event Purchase(address indexed buyer, uint256 amount);
   event Withdraw(address recipient, uint256 amount);
   event Deposit(uint256 amount);
+  event Price( uint256 newPrice, uint256 oldPrice);
 }
